@@ -1,0 +1,15 @@
+/* الشريط السفلي + الثيمات + الإعدادات + النسخ الاحتياطي */
+const tabs=[['pts','النقاط','pin'],['cogo','COGO','calc'],['map','الخريطة','map'],['gps','GPS','gps'],['area','المساحة','area'],['lev','الميزانية','level'],['vol','الكميات','vol'],['trv','الترافيرس','trv'],['crv','المنحنيات','crv'],['io','تبادل','io'],['tin','السطح والكونتور','level'],['adv','أدوات متقدمة','calc'],['rep','التقرير','doc'],['site','الموقع','site'],['set','الإعدادات','set']];
+const MAIN=['pts','cogo','map','gps'];let sheet=false;
+const ico=n=>`<svg class="ic"><use href="#i-${n}"/></svg>`;
+function nav(){const b=(t,c)=>`<button class="${c||''}${t[0]===tab?' on':''}" onclick="go2('${t[0]}')">${ico(t[2])}<span>${t[1]}</span></button>`;
+$('#bn').innerHTML=tabs.filter(t=>MAIN.includes(t[0])).map(t=>b(t)).join('')+`<button class="${!MAIN.includes(tab)||sheet?'on':''}" onclick="sheet=!sheet;nav()">${ico('more')}<span>المزيد</span></button>`;
+$('#sh').className=sheet?'open':'';$('#sh').innerHTML=tabs.filter(t=>!MAIN.includes(t[0])).map(t=>b(t,'o')).join('');
+const c=tabs.find(t=>t[0]===tab);$('#ttl').textContent=c?c[1]:'مساح برو'}
+function go2(t){tab=t;res=null;sheet=false;draw();scrollTo(0,0)}
+function applyTheme(t){document.documentElement.dataset.theme=t;ls('theme',t);const m=document.querySelector('meta[name=theme-color]');if(m)m.content={dark:'#0b0d10',light:'#eef1f5',contrast:'#000000'}[t]||'#0b0d10'}
+function cycleTheme(){const o=['dark','light','contrast'];applyTheme(o[(o.indexOf(ls('theme')||'dark')+1)%3])}
+function dl(n,t,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m||'text/plain'}));a.download=n;document.body.appendChild(a);a.click();a.remove()}
+function backup(){const s={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('site_'))s[k]=localStorage.getItem(k)}}catch(e){}dl('survey-backup-'+today()+'.json',JSON.stringify({v:1,pts,s}),'application/json')}
+function restore(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);(o.pts||[]).forEach(p=>{const i=pts.findIndex(x=>x.k===p.k);i>=0?pts[i]=p:pts.push(p);persist(p)});Object.entries(o.s||{}).forEach(([k,v])=>ls(k,v));alert('تمت الاستعادة');draw()}catch(e){alert('ملف غير صالح')}};r.readAsText(f)}
+function setH(){const th=ls('theme')||'dark';return `<div class="card np"><label>الثيم</label><select onchange="applyTheme(this.value);draw()">${[['dark','داكن (ميداني)'],['light','فاتح (مكتب)'],['contrast','تباين عالٍ']].map(o=>`<option value="${o[0]}"${o[0]===th?' selected':''}>${o[1]}</option>`).join('')}</select><label>اسم المهندس (يظهر في التقارير)</label><input value="${esc(ls('eng')||'')}" oninput="ls('eng',this.value)"></div><div class="card np"><button onclick="backup()">نسخة احتياطية (JSON)</button><div style="height:8px"></div><button class="o" onclick="$('#rf').click()">استعادة نسخة</button><input type="file" id="rf" accept=".json" hidden onchange="restore(this.files[0])"></div><div class="card"><div class="res">مساح برو v1.3\nعدد النقاط: ${pts.length}</div></div>`}
