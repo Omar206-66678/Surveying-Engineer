@@ -1,5 +1,5 @@
 /* ===== المرحلة 3: الترافيرس (Bowditch) + المنحنيات ===== */
-let tv={m:0,p:'',a:'',t:'',r:'5000',pf:'T'},cm=0,cv={R:'',D:'',pi:'',int:'10',pp:'',az:'',dr:'1',vp:'',ve:'',g1:'',g2:'',L:'',vi:'10'};
+let tv={m:0,p:'',a:'',t:'',r:'5000',pf:'T',q:''},cm=0,cv={R:'',D:'',pi:'',int:'10',pp:'',az:'',dr:'1',vp:'',ve:'',g1:'',g2:'',L:'',vi:'10'};
 const F=(n,o,k,l,ph)=>`<label>${l}</label><input value="${esc(o[k])}" oninput="${n}.${k}=this.value" placeholder="${ph||''}">`;
 function tvRun(){try{const P0=gp(tv.p),a1=parseAng(tv.a),cl=!tv.m;
 const L=tv.t.trim().split(/\r?\n/).filter(l=>l.trim()).map(l=>l.trim().split(/[,;\s]+/)),n=L.length;
@@ -14,11 +14,12 @@ if(cl){const sN=dN.reduce((s,x)=>s+x,0),sE=dE.reduce((s,x)=>s+x,0),lin=Math.hypo
 t.push('ΣΔN = '+(sN*1000).toFixed(1)+' مم   ΣΔE = '+(sE*1000).toFixed(1)+' مم','الخطأ الخطي = '+(lin*1000).toFixed(1)+' مم  ·  المحيط = '+f3(D)+' م','الدقة النسبية = 1 : '+(lin?Math.round(D/lin):'∞')+' (المطلوب 1:'+r+') → '+(ok?'صالح ✔':'مرفوض ✘'));
 dN=dN.map((x,i)=>x-sN*d[i]/D);dE=dE.map((x,i)=>x-sE*d[i]/D)}
 const Q=[[P0.n,P0.e]];dN.forEach((x,i)=>Q.push([Q[i][0]+x,Q[i][1]+dE[i]]));if(cl)Q.pop();
-t.push('','الإحداثيات'+(cl?' المصححة (Bowditch)':' (ترافيرس مفتوح بدون تصحيح)'));
+if(!cl&&tv.q.trim()){const K=gp(tv.q),mN=Q[n][0]-K.n,mE=Q[n][1]-K.e,lin=Math.hypot(mN,mE),rq=+tv.r||5000;let cu=0;t.push('الخطأ عند '+K.p+': ΔN='+(mN*1000).toFixed(1)+' مم  ΔE='+(mE*1000).toFixed(1)+' مم','الخطأ الخطي = '+(lin*1000).toFixed(1)+' مم · الدقة 1 : '+(lin?Math.round(D/lin):'∞')+' (المطلوب 1:'+rq+') → '+(lin===0||D/lin>=rq?'صالح ✔':'مرفوض ✘'));for(let i=1;i<=n;i++){cu+=d[i-1];Q[i][0]-=mN*cu/D;Q[i][1]-=mE*cu/D}}
+t.push('','الإحداثيات'+(cl||tv.q.trim()?' المصححة (Bowditch)':' (ترافيرس مفتوح بدون تصحيح)'));
 Q.forEach((q,i)=>t.push((i?tv.pf+(i+1):tv.p)+(i<n?'  ←'+toDMS(az[i])+'  '+f3(d[i])+' م':'')+'\n   N='+f3(q[0])+'  E='+f3(q[1])));
 res={t,Q,tv:1}}catch(e){res={e:1,t:[String(e)]}}draw()}
 function tvSave(){res.Q.forEach((q,i)=>{if(i)add(tv.pf+(i+1),q[0],q[1],null,'TRAV')});alert('تم حفظ المحطات كنقاط')}
-function tvH(){let h=`<select onchange="tv.m=+this.value;res=null;draw()"><option value="0"${tv.m?'':' selected'}>ترافيرس مغلق (زوايا داخلية مع عقارب الساعة)</option><option value="1"${tv.m?' selected':''}>ترافيرس مفتوح</option></select><div class="card np">`+F('tv',tv,'p','نقطة البداية (من النقاط)')+F('tv',tv,'a','اتجاه الضلع الأول د.ددثث')+`<label>كل سطر: زاوية المحطة (يمين)، المسافة للمحطة التالية${tv.m?' (السطر 1: زاوية 0)':''}</label><textarea oninput="tv.t=this.value" placeholder="90.0000, 100&#10;90.0000, 100&#10;90.0000, 100&#10;90.0000, 100">${esc(tv.t)}</textarea>`+F('tv',tv,'pf','بادئة أسماء المحطات')+(tv.m?'':F('tv',tv,'r','الدقة المطلوبة 1 :'))+`<div style="height:10px"></div><button onclick="tvRun()">احسب</button></div>`;
+function tvH(){let h=`<select onchange="tv.m=+this.value;res=null;draw()"><option value="0"${tv.m?'':' selected'}>ترافيرس مغلق (زوايا داخلية مع عقارب الساعة)</option><option value="1"${tv.m?' selected':''}>ترافيرس مفتوح</option></select><div class="card np">`+F('tv',tv,'p','نقطة البداية (من النقاط)')+F('tv',tv,'a','اتجاه الضلع الأول د.ددثث')+`<label>كل سطر: زاوية المحطة (يمين)، المسافة للمحطة التالية${tv.m?' (السطر 1: زاوية 0)':''}</label><textarea oninput="tv.t=this.value" placeholder="90.0000, 100&#10;90.0000, 100&#10;90.0000, 100&#10;90.0000, 100">${esc(tv.t)}</textarea>`+F('tv',tv,'pf','بادئة أسماء المحطات')+(tv.m?F('tv',tv,'q','نقطة النهاية المعلومة (اختياري)'):'')+F('tv',tv,'r','الدقة المطلوبة 1 :')+`<div style="height:10px"></div><button onclick="tvRun()">احسب</button></div>`;
 if(!res)return h;if(res.e)return h+resH();return h+`<div class="card"><div class="res">${esc(res.t.join('\n'))}</div></div><div class="card np"><button onclick="tvSave()">حفظ المحطات كنقاط</button></div>`}
 function crRun(){try{const t=[];
 if(!cm){const Rr=+cv.R,De=parseAng(cv.D||'x'),pi=sta(cv.pi),iv=+cv.int;if(!(Rr>0)||!(De>0)||isNaN(pi)||!(iv>0))throw'أدخل R و Δ ومحطة PI والفاصل';
